@@ -1,0 +1,44 @@
+﻿@page "/popup.html"
+@using System.IO;
+@using System.Diagnostics;
+@using CookieExtension.Models;
+
+@inherits BasePage
+@* @inject ServiceTest serviceTest *@
+@inject IJSRuntime js
+
+
+<div style="min-width: 300px; min-height:100px;">
+<BSContainer>
+
+    <BSRow Align="Align.Center">
+        <BSCol>
+            <h2>Cookies Extension</h2>
+        </BSCol>        
+    </BSRow>
+    
+    <BSRow Align="Align.Start">
+        <BSCol>
+            <BSButton OnClick="@OpenContentDialog" Color="BSColor.Primary">Open Cookies Dialog</BSButton>
+        </BSCol>
+    </BSRow>
+  
+</BSContainer>
+</div>
+
+
+
+@code {
+
+    /// <summary>
+    /// Calls injectContentScript javascript function to inject the Javascript content script in the actual page.
+    /// The ContentScript razor component will be injected by the content script.
+    /// </summary>
+    /// <returns></returns>
+    private async Task OpenContentDialog()
+    {        
+        await js.InvokeVoidAsync("injectContentScript");
+    }
+
+    
+}

@@ -1,0 +1,65 @@
+﻿{
+  "manifest_version": 3,
+  "name": "Cookie Extension",
+  "description": "My browser extension built with Blazor WebAssembly",
+  "version": "0.2",
+
+  "action": {
+    "default_popup": "popup.html"
+  },
+
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+
+  "background": {
+    "service_worker": "BackgroundWorker.js",
+    "type": "module"
+  },
+
+  
+  "content_scripts": [
+    {
+      "matches": [ "*://*/*" ],
+      //"match_origin_as_fallback": true,
+      //    "js": [
+      //      "content/Blazor.BrowserExtension/ContentScript.js"
+      //    ],
+      "js": [
+        "content/BlazorStrap/popper.min.js",
+        "content/BlazorStrap/blazorstrap.js",
+        "js/ScriptContent.js"
+      ],
+      "css": [
+        "CookieExtension.styles.css",
+        "css/bootstrap/bootstrap.min.css"
+      ]
+    }
+  ],
+
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';",
+    "sandbox": "sandbox allow-scripts; script-src 'self'; object-src 'self'"
+  },
+
+  "permissions": [ "scripting", "storage", "unlimitedStorage", "tabs", "webRequest", "cookies", "nativeMessaging", "activeTab" ],
+
+  "optional_permissions": [],
+
+  "host_permissions": [
+    "*://*/*"
+  ],
+
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "framework/*",
+        "content/*",
+        "app.js",
+        "index.html"
+      ],
+      "matches": [ "<all_urls>" ]
+    }
+  ]
+}

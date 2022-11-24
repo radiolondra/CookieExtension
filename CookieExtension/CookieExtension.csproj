@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Blazor.BrowserExtension" Version="0.10.*" />
+    <PackageReference Include="BlazorStrap" Version="5.0.106" />	
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.*-*" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="7.*-*" PrivateAssets="all" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\**\*" CopyToOutputDirectory="Always" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="wwwroot\app.js" />
+    <Content Remove="wwwroot\js\Functions.js" />
+    <Content Remove="wwwroot\js\ScriptContent.js" />
+  </ItemGroup>
+
+</Project>

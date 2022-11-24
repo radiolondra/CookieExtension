@@ -1,0 +1,47 @@
+﻿@page "/index.html"
+@inherits IndexPage
+@* @inject ServiceTest serviceTest *@
+@inject IJSRuntime js
+
+<h1>Hello, from Blazor Browser Extension Index page!</h1>
+
+<button class="btn btn-primary" @onclick="OnButtonClick_NoParams">C# -> JS and JS -> C# calls (no parameters)</button>
+<button class="btn btn-primary" @onclick="OnButtonClick_WithParams">C# -> JS and JS -> C# calls (with parameters)</button>
+<p>@content</p>
+
+@code {
+    private static string content { get; set; }
+    @*
+    protected override async Task OnInitializedAsync()
+    {
+        //serviceTest.test();
+        await js.InvokeVoidAsync("helloJS");
+    }
+    *@
+
+    private async Task OnButtonClick_NoParams()
+    {
+        await js.InvokeVoidAsync("helloJS");
+    }
+
+    private async Task OnButtonClick_WithParams()
+    {
+        await js.InvokeAsync<object>("helloJSParams");
+    }
+
+    
+    [JSInvokable]
+    public static string HelloJS()
+    {
+        
+        return "Hello Javascript from C#";
+    }
+    
+
+    [JSInvokable]
+    public static void HelloJSParams(string value)
+    {
+        content = value;
+    }
+    
+}
