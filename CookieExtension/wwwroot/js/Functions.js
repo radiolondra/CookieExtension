@@ -36,10 +36,13 @@ var injectContentScript = async function () {
                 browser.scripting.executeScript(
                     {
                         target: { tabId: tabs[0].id },
-                        files: ['content/Blazor.BrowserExtension/ContentScript.js'],                        
+                        files: ['content/Blazor.BrowserExtension/ContentScript.js'],
                     },
                     (res) => { }
                 );
+            }
+            else {
+                alert("This works in any http(s) page, not in extension pages.")
             }
         });
     
