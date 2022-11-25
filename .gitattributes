@@ -1,2 +1,2 @@
 browserextension/* linguist-vendored
-*.razor linguist-vendored=false
+*.* linguist-language=Blazor
