@@ -56,8 +56,7 @@
       "resources": [
         "framework/*",
         "content/*",
-        "app.js",
-        "index.html"
+        "app.js"
       ],
       "matches": [ "<all_urls>" ]
     }

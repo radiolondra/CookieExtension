@@ -23,8 +23,9 @@ var popupJSParams = function () {
 
 // =========================================================================
 
-// Injects the Javascript Content Script in the active tab. 
+// Injects the Javascript Content Script in the active tab.
 // The Javascript Content Script will inject ContentScript razor page in the active tab
+/*
 var injectContentScript = async function () {
     var localTabs = []
     let queryOptions = { active: true, currentWindow: true };
@@ -32,7 +33,7 @@ var injectContentScript = async function () {
         .then(tabs => {
             localTabs = tabs;
             console.log("Tab:", tabs[0]);
-            if (tabs[0].url.startsWith("http")) {
+            //if (tabs[0].url.startsWith("http")) {
                 browser.scripting.executeScript(
                     {
                         target: { tabId: tabs[0].id },
@@ -40,13 +41,55 @@ var injectContentScript = async function () {
                     },
                     (res) => { }
                 );
-            }
-            else {
-                alert("This works in any http(s) page, not in extension pages.")
-            }
+            //}
+            //else {
+            //    alert("This works in any webpage, not in extension pages.")
+            //}
         });
     
 }
+*/
+
+var injectContentScript = async function (tabId) {
+    //alert(tabId);
+    await browser.scripting.executeScript(
+        {
+            target: { tabId: tabId },
+            files: ['content/Blazor.BrowserExtension/ContentScript.js'],
+        },
+        (res) => { }
+    );
+            
+}
+
+
+var isTabExtensionPage = async function () {
+    let result = {}
+    let queryOptions = { active: true, currentWindow: true };
+    await browser.tabs.query(queryOptions)
+        .then(tabs => {            
+            console.log("Tab:", tabs[0]);
+
+            result["tabId"] = tabs[0].id;
+
+            if (tabs[0].url.startsWith("http")) {                
+                result["isWebpage"] = true;
+            }
+            else {                
+                result["isWebpage"] = false;
+            }
+            console.log("Result:", result);
+            console.log("Json Result:", JSON.stringify(result));
+            
+        });    
+    return JSON.stringify(result);
+}
+
+// Test
+var showAlert = function (value) {
+    alert(value);
+}
+
 
 
 

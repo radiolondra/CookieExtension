@@ -2,28 +2,28 @@
 @using System.IO;
 @using System.Diagnostics;
 @using CookieExtension.Models;
-
+@using Newtonsoft.Json
 @inherits BasePage
 @* @inject ServiceTest serviceTest *@
 @inject IJSRuntime js
 
 
 <div style="min-width: 300px; min-height:100px;">
-<BSContainer>
+    <BSContainer>
 
-    <BSRow Align="Align.Center">
-        <BSCol>
-            <h2>Cookies Extension</h2>
-        </BSCol>        
-    </BSRow>
+        <BSRow Align="Align.Center">
+            <BSCol>
+                <h2>Cookies Extension</h2>
+            </BSCol>        
+        </BSRow>
     
-    <BSRow Align="Align.Start">
-        <BSCol>
-            <BSButton OnClick="@OpenContentDialog" Color="BSColor.Primary">Open Cookies Dialog</BSButton>
-        </BSCol>
-    </BSRow>
+        <BSRow Align="Align.Start">
+            <BSCol>
+                <BSButton OnClick="@OpenContentDialog" Color="BSColor.Primary">Show 'GetCookies' Button</BSButton>
+            </BSCol>
+        </BSRow>
   
-</BSContainer>
+    </BSContainer>
 </div>
 
 
@@ -36,9 +36,19 @@
     /// </summary>
     /// <returns></returns>
     private async Task OpenContentDialog()
-    {        
-        await js.InvokeVoidAsync("injectContentScript");
-    }
+    {
+        var result = await js.InvokeAsync<string>("isTabExtensionPage");
+        //await js.InvokeVoidAsync("showAlert", result);
 
+        if (result != null)
+        {            
+            TabInfo tab = JsonConvert.DeserializeObject<TabInfo>(result);
+            if (tab.isWebpage)
+            {
+                await js.InvokeVoidAsync("injectContentScript", tab.tabId);
+            }
+        }
+        
+    }
     
 }
