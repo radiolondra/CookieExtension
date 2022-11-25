@@ -1,2 +1,2 @@
 browserextension/* linguist-vendored
-*.razor linguist-detectable=true
+*.razor linguist-language=C#
