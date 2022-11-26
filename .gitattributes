@@ -4,5 +4,9 @@ browserextension/* linguist-vendored
 
 # assume razor ext as csharp
 *.razor linguist-language=C#
+<<<<<<< Updated upstream
 *.cs linguist-language=C#
 
+=======
+*.cs linguist-language=C#
+>>>>>>> Stashed changes
