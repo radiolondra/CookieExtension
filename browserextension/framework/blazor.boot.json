@@ -208,13 +208,13 @@
       "mscorlib.dll": "sha256-pO\/W4w\/X+UjVMUMaxE5tYTQ0tILP+hmMu0zi0MSVBLc=",
       "netstandard.dll": "sha256-kj5cBXzwPYC+HD+P8+6VybY34JtEzjXjMIHXEI3hIiM=",
       "System.Private.CoreLib.dll": "sha256-Awk1lCiFfH7r9AAZfBtGqS8rhv6UJ5lUu3yF6HDH3tQ=",
-      "CookieExtension.dll": "sha256-o5kFqc0+jm+gtrvyromc0Yhxv3sNOxPcBDzZBV2\/9yE="
+      "CookieExtension.dll": "sha256-1WevwGBHbV2JfMmszuSA1xE9h5RfxrwHZjmHmKfpuOk="
     },
     "extensions": null,
     "lazyAssembly": null,
     "libraryInitializers": null,
     "pdb": {
-      "CookieExtension.pdb": "sha256-jQ1+VHKhwwo0H1+XeM6mCn572RScaSR6mlaVQsXuWrM="
+      "CookieExtension.pdb": "sha256-uNrX7ogUtPx4bPag9\/R5Gz\/ViPVMsoWuhmmYCiOcfAA="
     },
     "runtime": {
       "dotnet.7.0.0.e2k3i44qrp.js": "sha256-2jNLve8W0sST0LAebgAc1IwSnGhkbjOKO8QPWWiJssI=",

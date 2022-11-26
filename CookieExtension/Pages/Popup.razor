@@ -8,27 +8,68 @@
 @inject IJSRuntime js
 
 
-<div style="min-width: 300px; min-height:100px;">
-    <BSContainer>
+<div style="min-width:800px;">
+    <BSContainer Container="Container.ExrtaLarge">
 
         <BSRow Align="Align.Center">
             <BSCol>
-                <h2>Cookies Extension</h2>
+                <h2>Cookies Extension Popup</h2>
             </BSCol>        
         </BSRow>
     
         <BSRow Align="Align.Start">
             <BSCol>
-                <BSButton OnClick="@OpenContentDialog" Color="BSColor.Primary">Show 'GetCookies' Button</BSButton>
+                <BSLabel>This button opens the Cookies table data using C# and Javascript (in Functions.js)</BSLabel>
+            </BSCol>
+        </BSRow>
+        <BSRow Align="Align.Start">            
+            <BSCol>
+                <BSButton OnClick="@OpenContentDialog" Color="BSColor.Primary">Inject 'GetCookies' Button</BSButton>
+            </BSCol>
+        </BSRow>
+
+        <BSRow Align="Align.Start">
+            <BSLabel>This button opens the Cookies table data using C# only (WebExtensions). No Javascript is used.</BSLabel>
+        </BSRow>
+        <BSRow Align="Align.Start">
+            <BSCol>
+                <BSButton OnClick="@OpenContentDialogWE" Color="BSColor.Success">Inject 'GetCookies' Button</BSButton>
             </BSCol>
         </BSRow>
   
+        <p></p>
+        <BSRow Align="Align.Center">
+            @if (!isOpen) { return; }
+            <BSCol Column="12">
+                <BSAlert Heading="4" Color="BSColor.Warning" @ref="_alertRef" IsDismissible="true" Dismissed="@OnDismiss">
+                    <Header>Warning!</Header>
+                    <Content>
+                        <p>Please use this extension in a webpage, not inside a chrome:// page.</p>
+                        <hr />
+                        <p>This Alert is made in C# Blazor</p>
+                    </Content>
+                </BSAlert>
+            </BSCol>
+        </BSRow>
     </BSContainer>
 </div>
 
 
-
 @code {
+
+    private BSAlert? _alertRef;
+    private bool isOpen = false;
+
+    void OnDismiss()
+    {
+        isOpen = false;
+        StateHasChanged();
+    }
+
+    protected override void OnInitialized()
+    {
+        isOpen = false;
+    }
 
     /// <summary>
     /// Calls injectContentScript javascript function to inject the Javascript content script in the actual page.
@@ -47,8 +88,55 @@
             {
                 await js.InvokeVoidAsync("injectContentScript", tab.tabId);
             }
+            else
+            {
+                await js.InvokeVoidAsync("showAlert", "Please use this extension in a webpage, not inside a chrome:// page.");
+            }
         }
-        
+
     }
-    
+
+    /// <summary>
+    /// Injects the Javascript content script in the actual page without using Javascript functions.js
+    /// Injects ContentScript razor component in the content page
+    /// </summary>
+    /// <returns></returns>
+    private async Task OpenContentDialogWE()
+    {
+        IEnumerable<WebExtensions.Net.Tabs.Tab> tabs = new List<WebExtensions.Net.Tabs.Tab>();
+        WebExtensions.Net.Tabs.QueryInfo queryInfo = new WebExtensions.Net.Tabs.QueryInfo();
+
+        queryInfo.CurrentWindow = true;
+        queryInfo.Active = true;
+
+        tabs = await WebExtensions.Tabs.Query(queryInfo);    
+
+        var t = tabs.FirstOrDefault();        
+
+        if (t != null && t.Url.StartsWith("http"))
+        {
+            var id = t.Id;
+            //await js.InvokeVoidAsync("showAlert", id);            
+
+            WebExtensions.Net.Scripting.ScriptInjection injection = new WebExtensions.Net.Scripting.ScriptInjection();
+            var target = new WebExtensions.Net.Scripting.InjectionTarget();
+
+
+            IEnumerable<string> files = new List<string>();
+            files = files.Concat(new[] { "content/Blazor.BrowserExtension/ContentScript.js" });
+
+            target.TabId = (double)id;
+
+            injection.Files = files;
+            injection.Target = target;
+            
+            await WebExtensions.Scripting.ExecuteScript(injection);
+
+        }
+        else
+        {
+            isOpen = true;
+            _alertRef?.Open();
+        }
+    }
 }
