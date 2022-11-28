@@ -42,8 +42,8 @@ var getAllCookiesMessage = async function () {
 }
 
 // Test
-var showAlert = function () {
-    alert("I'm here");
+var showAlertInContent = function (value) {
+    alert(value);
 }
     
 

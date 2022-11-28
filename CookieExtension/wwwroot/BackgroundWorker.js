@@ -13,8 +13,24 @@ browser.runtime.onInstalled.addListener(() => {
 });
 
 // ----------------------------------------------------
-// Messages pump
+// Messages pumps
 // ----------------------------------------------------
+browser.runtime.onConnect.addListener(function (port) {
+    // If there is a 'CEPort' connection coming in...
+    if (port.name == "CEPort") {
+        // ...add a listener that is called when the other side posts a message on the port.
+        port.onMessage.addListener(function (message) {
+            switch (message.action) {
+                case "getAllCookies":
+                    sendResponse(getAllCookies);
+                    break;
+            }
+
+        });
+    }
+    return true;
+});
+
 browser.runtime.onMessage.addListener(
     function (message, sender, sendResponse) {
         switch (message.action) {
@@ -25,6 +41,7 @@ browser.runtime.onMessage.addListener(
                 var id = getActiveTab();
                 sendResponse(id);                
             case "getAllCookies":
+                
                 sendResponse(getAllCookies());
                 break;
         }

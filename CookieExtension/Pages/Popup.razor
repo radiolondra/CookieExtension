@@ -8,6 +8,8 @@
 @inject IJSRuntime js
 
 
+
+
 <div style="min-width:800px;">
     <BSContainer Container="Container.ExrtaLarge">
 
@@ -44,7 +46,7 @@
                 <BSAlert Heading="4" Color="BSColor.Warning" @ref="_alertRef" IsDismissible="true" Dismissed="@OnDismiss">
                     <Header>Warning!</Header>
                     <Content>
-                        <p>Please use this extension in a webpage, not inside a chrome:// page.</p>
+                        <p>Please use this button in a webpage, not inside a chrome:// page.</p>
                         <hr />
                         <p>This Alert is made in C# Blazor</p>
                     </Content>
@@ -57,8 +59,8 @@
 
 @code {
 
-    private BSAlert? _alertRef;
-    private bool isOpen = false;
+    private BSAlert _alertRef;
+    private bool isOpen = false;    
 
     void OnDismiss()
     {
@@ -90,10 +92,9 @@
             }
             else
             {
-                await js.InvokeVoidAsync("showAlert", "Please use this extension in a webpage, not inside a chrome:// page.");
-            }
+                await js.InvokeVoidAsync("showAlert", "Please use this button in a webpage, not inside a chrome:// page.");
+            }            
         }
-
     }
 
     /// <summary>
@@ -104,7 +105,7 @@
     private async Task OpenContentDialogWE()
     {
         IEnumerable<WebExtensions.Net.Tabs.Tab> tabs = new List<WebExtensions.Net.Tabs.Tab>();
-        WebExtensions.Net.Tabs.QueryInfo queryInfo = new WebExtensions.Net.Tabs.QueryInfo();
+        WebExtensions.Net.Tabs.QueryInfo queryInfo = new WebExtensions.Net.Tabs.QueryInfo();                
 
         queryInfo.CurrentWindow = true;
         queryInfo.Active = true;
@@ -129,8 +130,8 @@
 
             injection.Files = files;
             injection.Target = target;
-            
-            await WebExtensions.Scripting.ExecuteScript(injection);
+
+            await WebExtensions.Scripting.ExecuteScript(injection);           
 
         }
         else

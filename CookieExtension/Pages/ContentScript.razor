@@ -2,121 +2,38 @@
 @inherits BasePage
 @using CookieExtension.Models
 @using Newtonsoft.Json
+
 @inject IJSRuntime js
-
-@*
-<BSModal DataId="modal1">
-    <Header>Modal Title</Header>
-    <Content>Woohoo, you're reading this text in a modal!</Content>
-    <Footer Context="modal">
-        <BSButton MarginStart="Margins.Auto" Color="BSColor.Secondary" @onclick="modal.HideAsync">Close</BSButton>
-        <BSButton Color="BSColor.Primary">Save changes</BSButton>
-    </Footer>
-</BSModal>
-<BSButton Color="BSColor.Primary" Target="modal1">Launch demo modal</BSButton>
-*@
-
-<div>
-<BSModal @ref="Modal" IsScrollable="true" IsStaticBackdrop="true" IsCentered="true" Size="Size.ExtraLarge">
-    <BSModalHeader>Browser Cookies</BSModalHeader>
-    <BSModalContent>
-        
-        <div class="@BS.Input_Group mb-2">
-            <span class="@BS.Input_Group_Text">Custom Filter</span>
-            <BSInput InputType="InputType.Text" placeholder="By name or domain" Value="_customFilter" ValueChanged="(string e) => CustomFilter(e)" UpdateOnInput="true" />
-        </div>
-        
-        <BSDataTable 
-            Items="_cookies" 
-            TotalItems="_count" 
-            OnChange="OnChange" 
-            PaginationTop="true" 
-            StartPage="_startPage"
-            IsResponsive="true"
-            IsStriped="true"
-            RowsPerPage="ItemsPerPage" 
-            Context="item" 
-            @ref="_customFilterRef">
-            
-            <Header>
-                <BSDataTableHead TValue="CookieItem" Sortable="true" Column="@(nameof(CookieItem.CookieName))">Name</BSDataTableHead>
-                <BSDataTableHead TValue="CookieItem" Sortable="true" Column="@(nameof(CookieItem.CookieDomain))">Domain</BSDataTableHead>
-                <BSDataTableHead TValue="CookieItem" Sortable="true" Column="@(nameof(CookieItem.CookiePath))">Path</BSDataTableHead>
-            </Header>
-            <NoData>
-                    <BSLabel style="color:red;">No cookies. Did you clicked the "Get All Cookies" button?</BSLabel>                
-            </NoData>
-            <Body>
-                <BSDataTableRow>
-                    <BSTD>
-                        @item.CookieName
-                    </BSTD>
-                    <BSTD>
-                        @item.CookieDomain
-                    </BSTD>
-                    <BSTD>
-                        @item.CookiePath
-                    </BSTD>
-                </BSDataTableRow>
-            </Body>
-
-        </BSDataTable>
-            
-    </BSModalContent>
-    <BSModalFooter>
-        <BSButton @onclick="@(() => Modal.HideAsync())">Cancel</BSButton>
-        <BSButton OnClick="@GetAllBrowserCookies" Color="BSColor.Primary">Get All Cookies</BSButton>
-    </BSModalFooter>
-    
-</BSModal>
-</div>
-
-@*
-<BSButton Color="BSColor.Primary" Target="modal01">View Cookies</BSButton>
-*@
-<BSButton Color="BSColor.Primary" OnClick="LaunchModal">View All Browser Cookies</BSButton>
+@inject IBlazorStrap blazorStrap
 
 
-
+<CookiesGrid 
+    Modal="@Modal" 
+    cc="@cc" 
+    ExternalChange="@OnChange" 
+    ExternalFilter="@CustomFilter" 
+    ExternalGetCookies="@GetAllBrowserCookies">
+</CookiesGrid>
 
 @code {
+    private static BSModal Modal { get; set; } = new BSModal();
+    private static BSButton btn { get; set; } = new BSButton();
 
-    public BSModal Modal { get; set; }
+    private static CookiesClass cc = new CookiesClass(20,1);
 
-
-    public static string ReturnedValue = string.Empty;
-    public static string Count = string.Empty;
-    //private static IQueryable<CookieItem> cookieItems;
-    private static List<CookieItem> cookies = new List<CookieItem>();
-
-    private string? _customFilter;
-    private BSDataTable<CookieItem> _customFilterRef = new BSDataTable<CookieItem>();
-    private static int _startPage = 1;
-    //private readonly Table2Model _model = new Table2Model();
-    private static int _count = 0;
-    private static IEnumerable<CookieItem> _cookies = new List<CookieItem>();
-    private static int ItemsPerPage = 20;
-
-    public async Task LaunchModal()
-    {
-        //await js.InvokeVoidAsync("showAlert");
-        //await Task.Delay(1000);
-        await Modal.ShowAsync();        
-    }
+    private static string ReturnedValue = string.Empty;    
 
     /// <summary>
-    /// Gets all the in browser active cookies calling getAllCookies() javascript function
+    /// Gets all the browser active cookies calling getAllCookies() javascript function
     /// </summary>
     /// <returns></returns>
     private async Task GetAllBrowserCookies()
-    {
-        cookies.Clear();
+    {        
+        cc.data.Clear();
 
         await js.InvokeVoidAsync("getAllCookiesMessage");
         //await js.InvokeVoidAsync("console.log", $"COOKIES COUNT:{cookies.Count}");
-        
-
-    }
+    }    
 
     /// <summary>
     /// Called from getAllCookies() javascript function
@@ -124,28 +41,41 @@
     /// <param name="value">Returned JSON string containing all the cookies found.</param>
     [JSInvokable]
     public static void ShowAllActiveCookies(string value)
-    {
-        //Count = value.ToString();
+    {        
         ReturnedValue = value;
 
         CookieItem[] temp = JsonConvert.DeserializeObject<CookieItem[]>(ReturnedValue);
-        //cookieItems = cookies.AsQueryable();
-        cookies.AddRange(temp); 
-                
-        _count = cookies.Count();
-        _cookies = cookies.Skip(_startPage * ItemsPerPage).Take(ItemsPerPage);
-    }
 
-    public override async Task SetParametersAsync(ParameterView parameters)
-    {                
-        await base.SetParametersAsync(parameters);
-    }
+        foreach(CookieItem ci in temp)
+        {
+            cc.data.Add(ci);
+        }           
 
+        cc._count = cc.data.Count();
+        cc._cookies = cc.data.Skip(cc._startPage * cc.ItemsPerPage).Take(cc.ItemsPerPage);
+
+    } 
+
+    /* Port SendMessage tests. To be continued. See BackgroundWorker js
+    private async Task WEGetAllCookies()
+    {
+        cc.data.Clear();
+        var properties = new WebExtensions.Net.Runtime.ConnectInfo();
+        properties.Name = "CEPort";
+
+        //var port = await WebExtensions.Runtime.Connect(null, properties);
+
+        var m = await WebExtensions.Runtime.SendMessage(null, "getAllCookies", null);
+
+        await js.InvokeVoidAsync("alert", $"RETURN:{m}");
+
+    }
+    */
 
     protected override void OnInitialized()
-    {        
-        _count = cookies.Count();
-        _cookies = cookies.Skip(_startPage * ItemsPerPage).Take(ItemsPerPage);        
+    {
+        //js.InvokeVoidAsync("alert", $"In OnInitialized");
+        cc._count = 0;
     }
 
     /// <summary>
@@ -154,45 +84,16 @@
     /// <param name="dataRequest"></param>
     private void OnChange(DataRequest dataRequest)
     {
-        //Console.WriteLine(dataRequest.Descending);
-        _count = cookies.Count();
-
-        if (dataRequest.FilterColumnProperty != null && dataRequest.Filter != null)
-        {
-            _cookies = cookies.Where(q =>
-                (q.CookieDomain.ToLower().Contains(dataRequest.Filter) && nameof(q.CookieDomain) == dataRequest.FilterColumn) ||
-                (q.CookieName.ToLower().Contains(dataRequest.Filter) && nameof(q.CookieName) == dataRequest.FilterColumn)
-                ).ToList();
-            _count = _cookies.Count();
-        }
-        else if (dataRequest.SortColumnProperty != null)
-        {
-            if (dataRequest.Descending)
-                _cookies = cookies.OrderByDescending(x => dataRequest.SortColumnProperty.GetValue(x)).Skip(dataRequest.Page * ItemsPerPage).Take(ItemsPerPage);
-            else
-                _cookies = cookies.OrderBy(x => dataRequest.SortColumnProperty.GetValue(x)).Skip(dataRequest.Page * ItemsPerPage).Take(ItemsPerPage);
-        }
-        else
-
-        {
-            _cookies = cookies.Skip(dataRequest.Page * ItemsPerPage).Take(ItemsPerPage);
-        }
+        cc.OnChange(dataRequest);
         StateHasChanged();
     }
+    /// <summary>
+    /// Filter method for BS table
+    /// </summary>
+    /// <param name="e"></param>
     private void CustomFilter(string e)
     {
-        _customFilter = e;
-        _customFilterRef.Page = 1;
-        if (!string.IsNullOrEmpty(_customFilter))
-        {
-            _cookies = cookies.Where(q => q.CookieDomain.ToLower().Contains(_customFilter.ToLower()) || q.CookieName.ToLower().Contains(_customFilter.ToLower())).ToList();
-            _count = _cookies.Count();
-        }
-        else
-        {
-            _cookies = cookies.Take(ItemsPerPage);
-            _count = _cookies.Count();
-        }
-        StateHasChanged();        
+        cc.CustomFilter(e);
+        StateHasChanged();
     }
 }

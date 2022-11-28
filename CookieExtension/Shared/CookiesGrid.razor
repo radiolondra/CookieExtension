@@ -1,0 +1,97 @@
+﻿@page "/CookiesGrid.html"
+@using CookieExtension.Models;
+
+<BSModal @ref="Modal" DataId="modal01" IsScrollable=true IsStaticBackdrop=true ShowBackdrop=true Size="Size.ExtraLarge">
+    <Header>Browser Cookies</Header>
+    <Content>
+
+        <div class="@BS.Input_Group mb-2">
+            <span class="@BS.Input_Group_Text">Custom Filter</span>
+            <BSInput InputType="InputType.Text" placeholder="By name or domain" Value="cc._customFilter" ValueChanged="(string e) => ExternalFilter(e)" UpdateOnInput="true" />
+        </div>
+
+        <BSDataTable Items="cc._cookies"
+                     TotalItems="cc._count"
+                     OnChange="ExternalChange"
+                     PaginationTop="true"
+                     StartPage="cc._startPage"
+                     IsResponsive="true"
+                     IsStriped="true"
+                     RowsPerPage="cc.ItemsPerPage"
+                     Context="item"
+                     @ref="cc._customFilterRef">
+
+            <Header>
+                <BSDataTableHead TValue="CookieItem" Sortable="true" Column="@(nameof(CookieItem.CookieName))">Name</BSDataTableHead>
+                <BSDataTableHead TValue="CookieItem" Sortable="true" Column="@(nameof(CookieItem.CookieDomain))">Domain</BSDataTableHead>
+                <BSDataTableHead TValue="CookieItem" Sortable="true" Column="@(nameof(CookieItem.CookiePath))">Path</BSDataTableHead>
+            </Header>
+            <NoData>
+                <BSLabel style="color:red;">No cookies. Did you clicked the "Get All Cookies" button?</BSLabel>
+            </NoData>
+            <Body>
+                <BSDataTableRow>
+                    <BSTD>
+                        @item.CookieName
+                    </BSTD>
+                    <BSTD>
+                        @item.CookieDomain
+                    </BSTD>
+                    <BSTD>
+                        @item.CookiePath
+                    </BSTD>
+                </BSDataTableRow>
+            </Body>
+
+        </BSDataTable>
+
+    </Content>
+    <Footer>
+        <BSButton Target="modal01">Close</BSButton>        
+        <BSButton OnClick="ClickGetCookiesHandler" Color="BSColor.Primary">Get All Cookies</BSButton>
+    </Footer>
+
+</BSModal>
+
+@* The button to show the modal grid *@
+<BSRow Align="Align.Start" Padding="Padding.Small">
+    <BSCol>
+        <BSButton Color="BSColor.Success" OnClick="LaunchModal">View All Browser Cookies</BSButton>
+    </BSCol>
+</BSRow>
+
+
+@code {
+    [Parameter]
+    public BSModal Modal { get; set; }
+
+    [Parameter]
+    public CookiesClass cc { get; set; }
+
+    [Parameter]
+    public Action<DataRequest> ExternalChange { get; set; }
+
+    [Parameter]
+    public Action<string> ExternalFilter { get; set; }
+
+    [Parameter]
+    public EventCallback<int> ExternalGetCookies { get; set; }
+
+    /// <summary>
+    /// Gets the cookies
+    /// </summary>
+    private void ClickGetCookiesHandler()
+    {
+        cc.data.Clear();
+        ExternalGetCookies.InvokeAsync(0);
+    }
+
+    /// <summary>
+    /// Shows the modal cookies grid
+    /// </summary>
+    /// <returns></returns>
+    private async Task LaunchModal()
+    {
+        await Modal.ShowAsync();
+    }
+}

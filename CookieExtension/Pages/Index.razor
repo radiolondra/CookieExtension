@@ -1,16 +1,53 @@
 ﻿@page "/index.html"
+@using CookieExtension.Models;
 @inherits IndexPage
 @* @inject ServiceTest serviceTest *@
 @inject IJSRuntime js
 
-<h1>Hello, from Blazor Browser Extension Index page!</h1>
 
-<button class="btn btn-primary" @onclick="OnButtonClick_NoParams">C# -> JS and JS -> C# calls (no parameters)</button>
-<button class="btn btn-primary" @onclick="OnButtonClick_WithParams">C# -> JS and JS -> C# calls (with parameters)</button>
-<p>@content</p>
+<BSContainer Container="Container.Fluid">
+    <BSRow Align="Align.Start" Padding="Padding.Medium">
+        <BSCol>
+            <h2 style="text-align:center; color:darkblue;">Hello, from Blazor Browser Extension Index page!</h2>
+        </BSCol>
+    </BSRow>
+
+    <BSRow Align="Align.Start" Padding="Padding.Small">
+        <BSCol>
+            <BSButton Color="BSColor.Primary" OnClick="OnButtonClick_NoParams">C# -> JS and JS -> C# calls (no parameters)</BSButton>
+        </BSCol>    
+    </BSRow>
+
+    <BSRow Align="Align.Start" Padding="Padding.Small">
+        <BSCol>
+            <BSButton Color="BSColor.Primary" OnClick="OnButtonClick_WithParams">C# -> JS and JS -> C# calls (with parameters)</BSButton>
+        </BSCol>
+    </BSRow>
+    
+    
+    @* Insert CookiesGrid component *@
+    <CookiesGrid Modal="@Modal"
+                 cc="@cc"
+                 ExternalChange="@OnChange"
+                 ExternalFilter="@CustomFilter"
+                 ExternalGetCookies="@GetAllBrowserCookiesWE">
+    </CookiesGrid>
+
+    <BSRow Align="Align.Start" Padding="Padding.Small">
+        <BSLabel style="text-align:center; font-weight: bold; color:blue;">@content</BSLabel>
+    </BSRow>
+
+</BSContainer>
 
 @code {
     private static string content { get; set; }
+
+    private static BSModal Modal { get; set; } = new BSModal();
+    private static BSButton btn { get; set; } = new BSButton();
+
+    private static CookiesClass cc = new CookiesClass(20, 1);
+
+    private static string ReturnedValue = string.Empty;
     @*
     protected override async Task OnInitializedAsync()
     {
@@ -18,6 +55,11 @@
         await js.InvokeVoidAsync("helloJS");
     }
     *@
+    protected override void OnInitialized()
+    {
+        //js.InvokeVoidAsync("alert", $"In OnInitialized");
+        cc._count = 0;
+    }
 
     private async Task OnButtonClick_NoParams()
     {
@@ -29,19 +71,71 @@
         await js.InvokeAsync<object>("helloJSParams");
     }
 
-    
+
     [JSInvokable]
     public static string HelloJS()
     {
-        
+
         return "Hello Javascript from C#";
     }
-    
+
 
     [JSInvokable]
     public static void HelloJSParams(string value)
     {
         content = value;
+    }
+
+    private async Task GetAllBrowserCookiesWE()
+    {                
+
+        WebExtensions.Net.Cookies.GetAllDetails details = new();
+
+        /*
+        details.Url = null;
+        details.Domain = null;
+        details.FirstPartyDomain = null;
+        details.Name = null;
+        details.PartitionKey = null;
+        details.Path = null;
+        details.Secure = null;
+        details.Session = null;
+        details.StoreId = null;
+        */
+
+        var cookiesWE = await WebExtensions.Cookies.GetAll(details);
+
+        foreach (WebExtensions.Net.Cookies.Cookie cookie in cookiesWE)
+        {
+            CookieItem ci = new CookieItem(cookie.Name, cookie.Value, cookie.Domain, cookie.Path);
+            cc.data.Add(ci);
+        }
+
+        cc._count = cc.data.Count();
+        cc._cookies = cc.data.Skip(cc._startPage * cc.ItemsPerPage).Take(cc.ItemsPerPage);
+
+        content = $"You have {cc.data.Count()} cookies set";
+        StateHasChanged();
+
+    }
+
+    /// <summary>
+    /// OnChange event for the BS table
+    /// </summary>
+    /// <param name="dataRequest"></param>
+    private void OnChange(DataRequest dataRequest)
+    {
+        cc.OnChange(dataRequest);
+        StateHasChanged();
+    }
+    /// <summary>
+    /// Filter method for BS table
+    /// </summary>
+    /// <param name="e"></param>
+    private void CustomFilter(string e)
+    {
+        cc.CustomFilter(e);
+        StateHasChanged();
     }
     
 }
